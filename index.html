@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#0f172a">
+  <title>Wireless Sales Leads</title>
+  <style>
+    :root{
+      --bg:#0f172a; --panel:#0b1224; --muted:#334155; --text:#e5e7eb; --accent:#22d3ee; --violet:#a78bfa; --danger:#ef4444; --ok:#10b981; --warn:#f59e0b;
+      --line:#1a2641; --line2:#1f2d4a; --hover:#0b1328;
+    }
+    :root[data-theme="light"]{
+      --bg:#f8fafc; --panel:#ffffff; --muted:#64748b; --text:#0f172a; --accent:#0ea5e9; --violet:#6d28d9; --danger:#b91c1c; --ok:#0f766e; --warn:#b45309;
+      --line:#e2e8f0; --line2:#e5e7eb; --hover:#f1f5f9;
+    }
+    *{ box-sizing:border-box }
+    html,body{ height:100% }
+    body{ margin:0; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial; background: linear-gradient(180deg, var(--panel), var(--bg) 40%); color:var(--text) }
+    header{ position:sticky; top:0; z-index:20; backdrop-filter: blur(6px); background: color-mix(in oklab, var(--bg) 85%, transparent); border-bottom:1px solid var(--line) }
+    .wrap{ max-width:1080px; margin:0 auto; padding:14px 16px }
+    h1{ display:flex; gap:10px; align-items:center; margin:0; font-size:1.25rem }
+    .badge{ font-size:.75rem; border:1px solid var(--line); padding:2px 8px; border-radius:999px; color:var(--muted) }
+    input,select,textarea,button{ width:100%; background:var(--panel); color:var(--text); border:1px solid var(--line); border-radius:12px; padding:10px 12px; outline:none }
+    input::placeholder, textarea::placeholder{ color:color-mix(in oklab, var(--muted) 70%, transparent) } textarea{ resize:vertical; min-height:72px }
+    button{ cursor:pointer; font-weight:600 } .primary{ background: linear-gradient(180deg, color-mix(in oklab,var(--panel),var(--bg)), var(--panel)); border-color:var(--line) }
+    .ghost{ background:transparent } .danger{ background: color-mix(in oklab, #ff0000 12%, var(--panel) ); border-color: color-mix(in oklab, #ff0000 24%, var(--line)); color: color-mix(in oklab, #ff0000 50%, var(--text)) }
+    .row{ display:flex; gap:10px; flex-wrap:wrap } .grid{ display:grid; gap:10px; grid-template-columns:1fr } @media (min-width:980px){ .grid-2{ grid-template-columns: 1fr 1.2fr } }
+    .card{ background: linear-gradient(180deg, var(--panel), color-mix(in oklab, var(--panel) 92%, var(--bg))); border:1px solid var(--line); border-radius:16px; padding:14px }
+    label{ display:block; font-size:.85rem; color:var(--muted); margin-bottom:6px } .muted{ color:var(--muted); font-size:.9rem }
+    table{ width:100%; border-collapse:collapse } th,td{ padding:10px; border-bottom:1px dashed var(--line2); vertical-align:top } th{ text-align:left; font-size:.85rem; color:var(--violet) } tr:hover{ background:var(--hover) }
+    .pill{ padding:4px 8px; border:1px solid var(--line); border-radius:999px; font-size:.75rem; display:inline-block } .won{ color:var(--ok) } .lost{ color:color-mix(in oklab, #ef4444 75%, var(--text)) } .due{ color:var(--warn) } .overdue{ color:var(--danger) }
+    .stat{ background: color-mix(in oklab, var(--panel) 90%, var(--bg)); border:1px solid var(--line); padding:8px 10px; border-radius:12px; min-width:105px }
+    .fab{ position:fixed; right:14px; bottom:14px; z-index:20; border-radius:999px; padding:12px 16px }
+    .footer{ text-align:center; padding:18px; color:var(--muted); font-size:.85rem } .kpi{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end }
+    .sr{ position:absolute; left:-999rem; width:1px; height:1px; overflow:hidden }
+    .toolbar-right{ margin-left:auto; display:flex; gap:8px; flex-wrap:wrap; align-items:center }
+    .iconbtn{ border-radius:10px; padding:8px 10px }
+    .chip{ padding:4px 8px; border:1px solid var(--line); border-radius:999px; font-size:.8rem }
+    .caret{ user-select:none; cursor:pointer; padding:6px 10px; border-radius:10px; border:1px solid var(--line); background:var(--panel) }
+    .hidden{ display:none !important }
+  </style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>📱 Wireless Sales Leads <span class="badge">v4</span></h1>
+    <div class="row" style="margin-top:8px" id="filtersRow">
+      <input id="q" type="search" placeholder="Search name, phone, email, carrier, notes…">
+      <select id="filterStatus"><option value="">All outcomes</option><option>Open</option><option>Won</option><option>Lost</option></select>
+      <select id="filterStage">
+        <option value="">All stages</option>
+        <option>New</option><option>Contacted</option><option>Qualified</option><option>Demo/Solution</option>
+        <option>Proposal</option><option>Negotiation</option><option>Follow-Up</option><option>Awaiting Port</option>
+      </select>
+      <select id="filterCarrier"><option value="">All carriers</option><option>AT&amp;T</option><option>Verizon</option><option>T-Mobile</option><option>Other</option></select>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <select id="sortBy">
+        <option value="updated_at_desc">Sort: Recently updated</option>
+        <option value="follow_up_asc">Sort: Next follow-up</option>
+        <option value="name_asc">Sort: Name A→Z</option>
+        <option value="status_asc">Sort: Outcome</option>
+        <option value="stage_asc">Sort: Stage</option>
+      </select>
+      <label class="pill" style="display:flex; align-items:center; gap:8px"><input id="dueOnly" type="checkbox"> Show due/overdue only</label>
+      <div class="toolbar-right">
+        <button id="toggleTheme" class="iconbtn">Theme: Dark</button>
+        <button id="toggleTop" class="iconbtn">Collapse Top ▲</button>
+        <button id="btnExport" class="iconbtn">Export</button>
+        <label class="iconbtn" for="fileImport" style="cursor:pointer">Import<input id="fileImport" type="file" accept=".json,.csv" class="sr"></label>
+        <button id="btnShareAll" class="iconbtn">Share backup</button>
+        <button id="installBtn" class="iconbtn" style="display:none">Install</button>
+        <button id="enableNotifs" class="iconbtn">Enable notifications</button>
+        <button id="btnSettings" class="iconbtn">Settings</button>
+        <button id="btnAssistant" class="iconbtn">Assistant</button>
+        <button id="btnClear" class="iconbtn danger">Clear All</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" style="padding-top:10px">
+  <section class="grid grid-2" id="topSection">
+    <div class="card" id="leadCard">
+      <div class="row" style="justify-content:space-between; align-items:center">
+        <h2 style="margin:0">New / Edit Lead</h2>
+        <button id="collapseLead" class="caret">Collapse ▲</button>
+      </div>
+      <form id="leadForm">
+        <input type="hidden" id="leadId">
+        <div class="row">
+          <div style="flex:1"><label for="name">Lead Name *</label><input id="name" required placeholder="Full name"></div>
+          <div style="flex:1"><label for="phone">Phone *</label><input id="phone" required placeholder="(555) 123-4567"></div>
+        </div>
+        <label for="email">Email</label><input id="email" type="email" placeholder="name@example.com">
+        <div class="row">
+          <div style="flex:1"><label for="contactDate">Contact Date</label><input id="contactDate" type="date"></div>
+          <div style="flex:1"><label for="followUp">Follow-Up Date</label><input id="followUp" type="date"></div>
+        </div>
+        <div class="row">
+          <div style="flex:1"><label for="followUpTime">Follow-Up Time</label><input id="followUpTime" type="time" placeholder="09:00"></div>
+          <div style="flex:1"><label for="carrier">Current Carrier</label>
+            <select id="carrier"><option>AT&amp;T</option><option>Verizon</option><option>T-Mobile</option><option>Other</option></select>
+          </div>
+        </div>
+        <div class="row">
+          <div style="flex:1"><label for="stage">Stage</label>
+            <select id="stage">
+              <option>New</option><option>Contacted</option><option>Qualified</option><option>Demo/Solution</option>
+              <option>Proposal</option><option>Negotiation</option><option>Follow-Up</option><option>Awaiting Port</option>
+            </select>
+          </div>
+          <div style="flex:1"><label for="status">Outcome</label>
+            <select id="status"><option>Open</option><option>Won</option><option>Lost</option></select>
+          </div>
+        </div>
+        <label for="product">Interested Product/Plan</label><input id="product" placeholder="Unlimited plan, iPhone, tablet…">
+        <label for="notes">Notes</label><textarea id="notes" placeholder="Budget, objections, lines needed, trade-in, etc."></textarea>
+        <div class="row" style="margin-top:10px"><button type="submit" class="primary">Save Lead</button><button type="button" id="resetForm" class="ghost">Reset</button></div>
+        <p class="muted" style="margin:.5rem 0 0">Data is stored on this device. Export backups if you switch phones.</p>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="row" style="justify-content:space-between; align-items:center">
+        <h2 style="margin:0">Leads</h2>
+        <div class="row kpi">
+          <div class="stat"><div class="muted">Total</div><b id="kpiTotal">0</b></div>
+          <div class="stat"><div class="muted">Open</div><b id="kpiOpen">0</b></div>
+          <div class="stat"><div class="muted">Due</div><b id="kpiDue">0</b></div>
+          <div class="stat"><div class="muted">Won</div><b id="kpiWon">0</b></div>
+        </div>
+      </div>
+      <table id="list"><thead>
+        <tr><th>Name</th><th>Contact</th><th>Product / Carrier</th><th>Follow-Up</th><th>Stage / Outcome</th><th>Actions</th></tr>
+      </thead><tbody></tbody></table>
+    </div>
+  </section>
+</main>
+
+<button class="fab primary" id="fabAdd">+ Quick add</button>
+<div class="footer">Tip: Theme toggle for light/dark • Collapse top to focus on the list.</div>
+
+<script>
+(function(){
+  const $ = s => document.querySelector(s);
+  const storeKey = 'wl_leads_v4';
+  const notifKey = 'wl_notifs_v4';
+  const themeKey = 'wl_theme_v4';
+  const collapsedKey = 'wl_collapsed_v4';
+
+  // PWA basics
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; $('#installBtn').style.display='inline-block'; });
+  $('#installBtn').addEventListener('click', async () => { if(!deferredPrompt) return; deferredPrompt.prompt(); deferredPrompt = null; $('#installBtn').style.display='none'; });
+  if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js').catch(()=>{}); }
+
+  // THEME
+  function applyTheme(t){ document.documentElement.setAttribute('data-theme', t); $('#toggleTheme').textContent = 'Theme: ' + (t==='dark'?'Dark':'Light'); }
+  const savedTheme = localStorage.getItem(themeKey) || 'dark';
+  applyTheme(savedTheme);
+  $('#toggleTheme').addEventListener('click', ()=>{ const cur = document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark'; localStorage.setItem(themeKey, cur); applyTheme(cur); });
+
+  // COLLAPSE top (filters + form card)
+  function setCollapsed(v){
+    const top = $('#topSection'), filters = $('#filtersRow'), btn = $('#toggleTop'), leadCard = $('#leadCard');
+    if(v){ top.classList.add('hidden'); filters.classList.add('hidden'); btn.textContent='Expand Top ▼'; }
+    else { top.classList.remove('hidden'); filters.classList.remove('hidden'); btn.textContent='Collapse Top ▲'; }
+  }
+  const savedCollapsed = localStorage.getItem(collapsedKey) === '1';
+  setCollapsed(savedCollapsed);
+  $('#toggleTop').addEventListener('click', ()=>{ const now = !($('#topSection').classList.contains('hidden')); setCollapsed(now); localStorage.setItem(collapsedKey, now ? '1' : '0'); });
+
+  // Collapse individual New/Edit card
+  const leadFormBody = $('#leadForm').parentElement;
+  let leadCollapsed = false;
+  $('#collapseLead').addEventListener('click', ()=>{
+    leadCollapsed = !leadCollapsed;
+    leadFormBody.classList.toggle('hidden', leadCollapsed);
+    $('#collapseLead').textContent = leadCollapsed ? 'Expand ▼' : 'Collapse ▲';
+  });
+
+  // Data helpers
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+  const todayISO = () => new Date().toISOString().slice(0,10);
+  const toWhen = (date, time) => { if(!date) return null; try{ const [h,m] = (time||'09:00').split(':').map(x=>parseInt(x,10)); const dt = new Date(date); dt.setHours(h||9, m||0, 0, 0); return dt; }catch(_){ return new Date(date + 'T09:00'); } };
+  const fmtDateTime = (date, time) => { const d = toWhen(date, time); return d ? d.toLocaleString() : ''; };
+  const isOverdue = (date, time) => { const w = toWhen(date, time); return w && w.getTime() < Date.now() - 60*1000; };
+  const isDueSoon = (date, time) => { const w = toWhen(date, time); if(!w) return false; const t=w.getTime(), now=Date.now(); return t >= now - 60*1000 && t <= now + 60*1000; };
+  const esc = s => (s||'').toString().replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',\"'\":'&#39;'}[c]));
+
+  function load(){ try{ return JSON.parse(localStorage.getItem(storeKey) || '[]'); }catch(_){ return []; } }
+  function save(list){ localStorage.setItem(storeKey, JSON.stringify(list)); }
+  function loadNotifs(){ try{ return JSON.parse(localStorage.getItem(notifKey) || '[]'); }catch(_){ return []; } }
+  function saveNotifs(ids){ localStorage.setItem(notifKey, JSON.stringify(ids)); }
+
+  function badgeOutcome(s){ const cls = s==='Won'?'won': s==='Lost'?'lost':''; return `<span class="pill ${cls}">${esc(s||'Open')}</span>`; }
+  function badgeFollow(date,time){ if(!date) return '<span class="muted">—</span>'; let cls='muted'; if(isOverdue(date,time)) cls='overdue'; else if(isDueSoon(date,time)) cls='due'; return `<span class="${cls}">${esc(fmtDateTime(date,time))}</span>`; }
+
+  function getFilteredSorted(){
+    const q = ($('#q').value||'').trim().toLowerCase();
+    const st = $('#filterStatus').value;
+    const stg = $('#filterStage').value;
+    const car = $('#filterCarrier').value;
+    const dueOnly = $('#dueOnly').checked;
+    const sort = $('#sortBy').value;
+    let list = load();
+    list = list.filter(x => {
+      const hay = [x.name,x.phone,x.email,x.product,x.carrier,x.notes,x.stage,x.status].join(' ').toLowerCase();
+      const matchesQ = !q || hay.includes(q);
+      const matchesStatus = !st || x.status === st;
+      const matchesStage = !stg || x.stage === stg;
+      const matchesCarrier = !car || x.carrier === car;
+      const due = x.followUp && (isOverdue(x.followUp,x.followUpTime) || isDueSoon(x.followUp,x.followUpTime));
+      const matchesDue = !dueOnly || due;
+      return matchesQ && matchesStatus && matchesStage && matchesCarrier && matchesDue;
+    });
+    list.sort((a,b) => {
+      switch(sort){
+        case 'name_asc': return (a.name||'').localeCompare(b.name||'');
+        case 'status_asc': return (a.status||'').localeCompare(b.status||'');
+        case 'stage_asc': return (a.stage||'').localeCompare(b.stage||'');
+        case 'follow_up_asc':
+          const af = (a.followUp || '9999-12-31') + 'T' + (a.followUpTime || '23:59');
+          const bf = (b.followUp || '9999-12-31') + 'T' + (b.followUpTime || '23:59');
+          return af.localeCompare(bf);
+        default: return (b.updated_at||'').localeCompare(a.updated_at||'');
+      }
+    });
+    return list;
+  }
+
+  function render(){
+    const list = getFilteredSorted();
+    const tbody = $('#list tbody'); tbody.innerHTML='';
+    for(const x of list){
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><b>${esc(x.name)}</b><div class="muted">${esc(x.notes||'')}</div></td>
+        <td>${esc(x.phone||'')}<div class="muted">${esc(x.email||'')}</div></td>
+        <td>${esc(x.product||'')}<div class="muted pill">${esc(x.carrier||'')}</div></td>
+        <td>${badgeFollow(x.followUp, x.followUpTime)}</td>
+        <td><span class="pill">${esc(x.stage||'')}</span> ${badgeOutcome(x.status||'Open')}</td>
+        <td><div class="row"><button class="pill" data-act="edit" data-id="${x.id}">Edit</button><button class="pill" data-act="share" data-id="${x.id}">Share</button><button class="pill danger" data-act="del" data-id="${x.id}">Delete</button></div></td>`;
+      tr.addEventListener('click', (e)=>{ if(!(e.target instanceof HTMLElement)) return; const act=e.target.getAttribute('data-act'); if(act) return; loadToForm(x.id); });
+      tr.querySelector('[data-act="edit"]').addEventListener('click', ()=> loadToForm(x.id));
+      tr.querySelector('[data-act="share"]').addEventListener('click', ()=> shareLead(x));
+      tr.querySelector('[data-act="del"]').addEventListener('click', ()=> { if(confirm('Delete this lead?')) del(x.id); });
+      tbody.appendChild(tr);
+    }
+    const all = load();
+    $('#kpiTotal').textContent = all.length;
+    $('#kpiOpen').textContent = all.filter(x => x.status==='Open').length;
+    $('#kpiDue').textContent = all.filter(x => x.followUp && (isOverdue(x.followUp,x.followUpTime) || isDueSoon(x.followUp,x.followUpTime))).length;
+    $('#kpiWon').textContent = all.filter(x => x.status==='Won').length;
+  }
+
+  function loadToForm(id){
+    const x = load().find(v => v.id === id); if(!x) return;
+    $('#leadId').value = x.id; $('#name').value = x.name||''; $('#phone').value = x.phone||''; $('#email').value = x.email||'';
+    $('#contactDate').value = x.contactDate||''; $('#followUp').value = x.followUp||''; $('#followUpTime').value = x.followUpTime||'';
+    $('#product').value = x.product||''; $('#carrier').value = x.carrier||'Other'; $('#stage').value = x.stage||'New';
+    $('#status').value = x.status||'Open'; $('#notes').value = x.notes||''; window.scrollTo({top:0, behavior:'smooth'});
+  }
+  function upsert(data){ const list = load(); const idx = list.findIndex(v => v.id === data.id); data.updated_at = new Date().toISOString(); if(idx>=0) list[idx]=data; else list.unshift(data); save(list); render(); }
+  function del(id){ save(load().filter(v => v.id !== id)); render(); }
+
+  // Form submit
+  $('#leadForm').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    if(!$('#name').value.trim() || !$('#phone').value.trim()){ alert('Name and phone are required.'); return; }
+    const data = {
+      id: $('#leadId').value || uid(), name: $('#name').value.trim(), phone: $('#phone').value.trim(), email: $('#email').value.trim(),
+      contactDate: $('#contactDate').value || '', followUp: $('#followUp').value || '', followUpTime: $('#followUpTime').value || '',
+      product: $('#product').value.trim(), carrier: $('#carrier').value, stage: $('#stage').value, status: $('#status').value,
+      notes: $('#notes').value.trim(), updated_at: ''
+    };
+    upsert(data); $('#leadForm').reset(); $('#leadId').value='';
+  });
+  $('#resetForm').addEventListener('click', ()=>{ $('#leadForm').reset(); $('#leadId').value=''; });
+  $('#fabAdd').addEventListener('click', ()=>{ const blank={ id:uid(), name:'New lead', phone:'', email:'', contactDate: new Date().toISOString().slice(0,10), followUp:'', followUpTime:'', product:'', carrier:'Other', stage:'New', status:'Open', notes:'', updated_at:'' }; upsert(blank); loadToForm(blank.id); });
+
+  // Search / filter listeners
+  ['#q','#filterStatus','#filterStage','#filterCarrier','#sortBy','#dueOnly'].forEach(id => { const x=$(id); if(x){ x.addEventListener('input', render); x.addEventListener('change', render);} });
+
+  // Export
+  $('#btnExport').addEventListener('click', ()=>{ const data = JSON.stringify(load(), null, 2); const blob = new Blob([data], {type:'application/json'}); const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='wireless_leads_backup.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),500); });
+
+  // Share backup
+  $('#btnShareAll').addEventListener('click', async ()=>{ const text = JSON.stringify(load(), null, 2); if (navigator.canShare && navigator.canShare()) { try{ const file = new File([text],'wireless_leads_backup.json',{type:'application/json'}); await navigator.share({ title:'Wireless Leads Backup', text:'Backup file attached.', files:[file] }); return; }catch(e){} } if (navigator.share) { try{ await navigator.share({ title:'Wireless Leads Backup', text }); return; }catch(e){} } await navigator.clipboard.writeText(text); alert('Backup copied to clipboard.'); });
+
+  // Import
+  $('#fileImport').addEventListener('change', (e)=>{
+    const file = e.target.files && e.target.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      try{
+        let imported = [];
+        if (file.name.toLowerCase().endsWith('.json')) imported = JSON.parse(reader.result);
+        else if (file.name.toLowerCase().endsWith('.csv')) imported = csvToObjects(reader.result);
+        if(!Array.isArray(imported)) throw new Error('Invalid file format');
+        const current = load(); const byId = new Map(current.map(x => [x.id, x]));
+        for (const raw of imported){ const x = normalize(raw); if(!x.name || !x.phone) continue; if(!x.id) x.id = uid(); x.updated_at = new Date().toISOString(); byId.set(x.id, x); }
+        save(Array.from(byId.values())); render(); alert('Import complete.');
+      }catch(err){ alert('Import failed: ' + err.message); }
+      finally { e.target.value=''; }
+    };
+    reader.readAsText(file);
+  });
+
+  // Delete all
+  $('#btnClear').addEventListener('click', ()=>{ if(confirm('This removes all leads on this device. Continue?')){ localStorage.removeItem(storeKey); localStorage.removeItem(notifKey); render(); } });
+
+  // Utilities for CSV/normalize
+  function normalize(x){
+    const obj = {
+      id: x.id || x.ID || '', name: x.name || x.Name || '', phone: x.phone || x.Phone || '', email: x.email || x.Email || '',
+      contactDate: (x.contactDate || x['Contact Date'] || '').toString().slice(0,10),
+      followUp: (x.followUp || x['Follow-Up Date'] || x['Follow Up'] || '').toString().slice(0,10),
+      followUpTime: x.followUpTime || x['Follow-Up Time'] || '',
+      product: x.product || x['Interested Product/Plan'] || x['Product'] || '',
+      carrier: x.carrier || x['Current Carrier'] || 'Other',
+      stage: x.stage || x.Stage || 'New',
+      status: (x.status || x.Status || 'Open'),
+      notes: x.notes || x.Notes || '',
+      updated_at: x.updated_at || ''
+    };
+    if(obj.carrier && !['AT&T','Verizon','T-Mobile','Other'].includes(obj.carrier)) obj.carrier = 'Other';
+    if(!['Open','Won','Lost'].includes(obj.status)) obj.status = 'Open';
+    return obj;
+  }
+  function csvToObjects(csv){
+    const rows = csv.split(/\\r?\\n/).filter(Boolean);
+    const headers = rows.shift().split(',').map(x => x.trim().replace(/^"|"$/g,''));
+    return rows.map(r => { const cols = parseCsvRow(r); const obj = {}; headers.forEach((h,i)=> obj[h] = cols[i] || ''); return obj; });
+  }
+  function parseCsvRow(row){
+    const out = []; let cur = ''; let inQ = false;
+    for(let i=0;i<row.length;i++){ const ch = row[i];
+      if(ch === '"'){ if(inQ && row[i+1] === '"'){ cur+='"'; i++; } else inQ = !inQ; }
+      else if(ch === ',' && !inQ){ out.push(cur); cur=''; } else cur += ch;
+    } out.push(cur); return out.map(v => v.replace(/^"|"$/g,''));
+  }
+
+  // Notifications minimal (kept from v3 for continuity)
+  async function ensurePermission(){ if (!('Notification' in window)) { alert('Notifications not supported on this device/browser.'); return false; } if (Notification.permission === 'granted') return true; if (Notification.permission === 'denied') { alert('Notifications are blocked. Enable in system settings.'); return false; } const res = await Notification.requestPermission(); return res === 'granted'; }
+  async function showNotification(title, body){ try{ const reg = (await navigator.serviceWorker.getRegistration()) || null; if (reg && reg.showNotification) { reg.showNotification(title, { body, icon: './icons/icon-192.png', badge: './icons/icon-192.png' }); } else if ('Notification' in window) { new Notification(title, { body }); } }catch(_){} }
+  document.getElementById('enableNotifs').addEventListener('click', async ()=>{ if (await ensurePermission()) { await showNotification('Notifications enabled', 'You will receive follow-up alerts.'); } });
+
+  // Follow-up due loop (30s)
+  setInterval(()=>{
+    const already = new Set(loadNotifs());
+    const list = load();
+    const toNotify = [];
+    for (const x of list){
+      if (!x.followUp || x.status!=='Open') continue;
+      const due = isDueSoon(x.followUp, x.followUpTime) || isOverdue(x.followUp, x.followUpTime);
+      if (due && !already.has(x.id)) toNotify.push(x);
+    }
+    if (toNotify.length){
+      const ids = loadNotifs();
+      toNotify.forEach(x => { const when = fmtDateTime(x.followUp, x.followUpTime); showNotification('Follow-up: ' + x.name, (x.product? x.product + ' • ' : '') + (when ? ('Due ' + when) : 'Due now')); ids.push(x.id); });
+      saveNotifs(ids);
+    }
+  }, 30000);
+
+  // Seed demo data
+  (function seed(){
+    const list = load(); if(list.length){ render(); return; }
+    const sample = [
+      {name:'Alex Johnson', phone:'(205) 555-1020', email:'alex@example.com', product:'Unlimited + iPhone', carrier:'Verizon', stage:'Qualified', status:'Open', contactDate: new Date().toISOString().slice(0,10), followUp: new Date().toISOString().slice(0,10), followUpTime:'09:00', notes:'3 lines • trade-in eligible'},
+      {name:'B. Rivera', phone:'(256) 555-3399', email:'brivera@example.com', product:'Tablet + hotspot', carrier:'AT&T', stage:'Contacted', status:'Open', contactDate: new Date().toISOString().slice(0,10), followUp:'', followUpTime:'', notes:'Budget conscious.'},
+      {name:'Chris Lee', phone:'(334) 555-7788', email:'', product:'BYOD (SIM-only)', carrier:'T-Mobile', stage:'Proposal', status:'Won', contactDate: new Date().toISOString().slice(0,10), followUp:'', followUpTime:'', notes:'Closed 2-line family plan.'},
+    ].map(x => Object.assign({ id: (Date.now()+Math.random()).toString(36), updated_at: new Date().toISOString() }, x));
+    save(sample); render();
+  })();
+
+  render();
+})();
+</script>
+</body>
+</html>
